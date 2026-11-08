@@ -1,0 +1,16 @@
+{
+  "name": "totem",
+  "version": "0.1.0",
+  "description": "Your own context center inside Claude Code. Say @totem, or just ask about yourself, and Claude looks it up in the totem on your computer.",
+  "author": {
+    "name": "ipo Lab"
+  },
+  "homepage": "https://try.ipolab.ai",
+  "license": "Apache-2.0",
+  "keywords": [
+    "context",
+    "memory",
+    "personal",
+    "mcp"
+  ]
+}

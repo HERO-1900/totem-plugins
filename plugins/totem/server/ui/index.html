@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>totem</title>
+<style>
+:root{
+  --bg:#F6F6F4; --sf:#FFFFFF; --ink:#1D1D1B; --ink2:#5E5D58; --ink3:#8F8D86; --line:#E3E2DD;
+  --red:#A33F2D; --reds:#F4E6E2; --ok:#2F6B4F; --oks:#E3EFE8; --warn:#8A6512; --warns:#F5ECD8;
+  --sans:-apple-system,"PingFang SC","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#151514; --sf:#1F1F1D; --ink:#EDECE8; --ink2:#AAA8A1; --ink3:#7C7A74; --line:#33322F;
+  --red:#D0705E; --reds:#3A2420; --ok:#7BC29E; --oks:#1D3128; --warn:#D9B060; --warns:#352C17; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.6 var(--sans);font-feature-settings:"palt"}
+button,input,select{font:inherit;color:inherit}
+.top{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--sf);flex-wrap:wrap}
+.wm{font-weight:700;font-size:17px;letter-spacing:-.01em}
+.stat{font-size:12.5px;color:var(--ink2)}
+.sp{flex:1}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:none;padding:3px 10px;cursor:pointer;font-size:12.5px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.panes{display:grid;grid-template-columns:300px 230px minmax(0,1fr);height:calc(100% - 52px)}
+.pane{overflow:auto;padding:14px;border-right:1px solid var(--line);min-width:0;display:flex;flex-direction:column;gap:12px}
+.pane:last-child{border-right:0}
+.lab{font:500 11px/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.grp{display:flex;flex-direction:column;gap:4px}
+.gh{font-size:12px;color:var(--ink3);display:flex;justify-content:space-between}
+.item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;padding:5px 8px;border-radius:7px;border:1px solid transparent;font-size:13px;line-height:1.5}
+.item.on{background:var(--reds);border-color:color-mix(in srgb,var(--red) 30%,transparent)}
+.item.off{opacity:.4}
+.item .ctl{display:flex;gap:4px;align-items:start;visibility:hidden}
+.item:hover .ctl,.item:focus-within .ctl{visibility:visible}
+.item select,.item .x{font-size:11px;border:1px solid var(--line);background:var(--sf);border-radius:5px;padding:0 3px;cursor:pointer}
+.tg{font:500 10.5px/1.6 var(--mono);padding:0 6px;border-radius:5px;white-space:nowrap}
+.S1{background:var(--oks);color:var(--ok)} .S2{background:var(--bg);color:var(--ink2);border:1px solid var(--line)}
+.S3{background:var(--warns);color:var(--warn)} .S4{background:var(--reds);color:var(--red)}
+.inf{color:var(--warn);border:1px dashed var(--warn)}
+#q{width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--sf)}
+.apps{display:flex;flex-direction:column;gap:1px}
+.apps .cat{font-size:11.5px;color:var(--ink3);margin:8px 0 2px}
+.apps button{all:unset;cursor:pointer;padding:5px 9px;border-radius:7px;font-size:13.5px}
+.apps button:hover{background:var(--sf)}
+.apps button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.apps button:focus-visible{outline:2px solid var(--red)}
+.out{max-width:720px}
+.out h2{margin:0;font-size:20px}
+.sub{font-size:12.5px;color:var(--ink3)}
+.rows{display:flex;flex-direction:column;gap:6px}
+.row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;padding:8px 10px;border-radius:9px;background:var(--sf);border:1px solid var(--line);align-items:start}
+.row .src{grid-column:2/-1;font-size:11.5px;color:var(--ink3)}
+.row input{margin-top:4px;accent-color:var(--red)}
+.gap{padding:9px 12px;border-radius:9px;border:1px dashed var(--line);font-size:13px;color:var(--ink2);display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+.gap b{color:var(--ink)}
+.gap button,.btn{border:1px solid var(--line);background:var(--sf);border-radius:7px;padding:3px 10px;cursor:pointer;font-size:12.5px}
+.btn.pri{background:var(--red);color:#fff;border-color:var(--red)}
+.fp{padding:12px 14px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:14px;line-height:1.7;white-space:pre-wrap}
+.fp .lab{color:color-mix(in srgb,var(--bg) 60%,transparent);display:block;margin-bottom:6px}
+.fp.wait{opacity:.75}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rc{font-size:12px;color:var(--ink3);display:flex;flex-direction:column;gap:2px}
+.empty{color:var(--ink2);font-size:13.5px;line-height:1.8}
+.empty code{font-family:var(--mono);background:var(--sf);padding:1px 6px;border-radius:5px;border:1px solid var(--line)}
+.addf{display:flex;gap:6px;flex-wrap:wrap}
+.addf input{flex:1;min-width:10em;padding:4px 8px;border:1px solid var(--line);border-radius:7px;background:var(--sf)}
+@media (max-width:900px){.panes{grid-template-columns:1fr;height:auto}.pane{border-right:0;border-bottom:1px solid var(--line);overflow:visible}.pane.me{order:3}}
+</style>
+</head>
+<body>
+<div class="top">
+  <span class="wm">totem</span>
+  <span class="stat" id="stat"></span>
+  <span class="sp"></span>
+  <span class="stat" id="model"></span>
+  <div class="seg" role="group" aria-label="language"><button type="button" id="l-zh" data-l="zh">中文</button><button type="button" id="l-en" data-l="en">EN</button></div>
+</div>
+<div class="panes">
+  <div class="pane me" id="me"></div>
+  <div class="pane">
+    <input id="q" type="search" autocomplete="off">
+    <div class="apps" id="apps"></div>
+  </div>
+  <div class="pane"><div class="out" id="out" style="display:flex;flex-direction:column;gap:14px"></div></div>
+</div>
+<script>
+const T={
+ zh:{q:"找 App，或者写一件事",items:"条",from:"来自",me:"你的 totem",lit:"亮起来的，是这一次会给出去的。悬停可以改层级或隐藏。",gets:"会拿到",ask:"要你同意才给",missing:"还缺",add:"补一条",first:"收到的第一句",copy:"复制，交给它",copied:"已复制，留了一张收据",receipts:"最近给出去的",none:"还没有",inf:"推断",hide:"隐藏",show:"显示",task:"自己写的事",empty:"还没有整理过。在终端里运行 <code>totem scan</code>，再刷新这个页面。",nothing:"这件事，totem 现在没有能给的。",writing:"正在写…",byT:"模板",save:"存下",model:"整理用的模型："},
+ en:{q:"Find an app, or type a task",items:"items",from:"from",me:"Your totem",lit:"Highlighted items go out this time. Hover to change a level or hide one.",gets:"gets",ask:"Only if you allow",missing:"Missing",add:"Add it",first:"first message",copy:"Copy and hand it over",copied:"Copied. A receipt was saved.",receipts:"Recently shared",none:"Nothing yet",inf:"inferred",hide:"Hide",show:"Show",task:"Your own task",empty:"Nothing organized yet. Run <code>totem scan</code> in a terminal, then reload.",nothing:"totem has nothing for this one yet.",writing:"Writing…",byT:"template",save:"Save",model:"Organized with: "}
+};
+let S=null, lang=(()=>{try{return localStorage.getItem("totem-lang")}catch{return null}})()||(navigator.language.startsWith("zh")?"zh":"en");
+let cur={app:"airbnb"}, allow=new Set(), drop=new Set(), lastView=null, fpSeq=0;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const nm=a=>lang==="zh"?a.name:(a.name_en||a.name);
+const txt=i=>lang==="zh"?i.text:(i.text_en||i.text);
+const lv=l=>S.levels[l]?.[lang]||l;
+async function api(p,body){const r=await fetch(p,body?{method:"POST",headers:{"content-type":"application/json","x-totem":"1"},body:JSON.stringify(body)}:{});return r.json()}
+
+async function load(){S=await api("/api/state");render()}
+function render(){
+ const t=T[lang];document.documentElement.lang=lang;
+ $("l-zh").setAttribute("aria-pressed",lang==="zh");$("l-en").setAttribute("aria-pressed",lang==="en");
+ $("q").placeholder=t.q;
+ const src=(S.profile.sources||[]).map(s=>`${s.name} ${s.messages}`).join(" · ");
+ $("stat").textContent=`${S.items.filter(i=>!i.hidden).length} ${t.items}${src?" · "+t.from+" "+src:""}`;
+ $("model").textContent=S.profile.model?t.model+S.profile.model:"";
+ renderApps();renderView();
+}
+function renderMe(on){
+ const t=T[lang];
+ if(!S.items.length){$("me").innerHTML=`<span class="lab">${t.me}</span><p class="empty">${t.empty}</p>`;return}
+ let h=`<span class="lab">${t.me}</span>`;
+ for(const [k,name] of Object.entries(S.kinds)){
+  const its=S.items.filter(i=>i.kind===k);if(!its.length)continue;
+  h+=`<div class="grp"><div class="gh"><span>${name[lang]}</span><span>${its.length}</span></div>`;
+  for(const i of its){
+   h+=`<div class="item ${on.has(i.id)?"on":""} ${i.hidden?"off":""}"><span>${esc(txt(i))}</span><span class="ctl">
+    <select aria-label="level" data-id="${i.id}">${["S1","S2","S3","S4"].map(l=>`<option ${l===i.level?"selected":""}>${l}</option>`).join("")}</select>
+    <button type="button" class="x" data-hide="${i.id}">${i.hidden?t.show:t.hide}</button></span></div>`;
+  }
+  h+=`</div>`;
+ }
+ h+=`<p class="sub">${t.lit}</p>`;
+ $("me").innerHTML=h;
+}
+function renderApps(){
+ const q=$("q").value.trim().toLowerCase();let h="",last="";
+ for(const a of S.catalog.apps){
+  const hay=(a.name+(a.name_en||"")+a.task_zh+a.task_en+a.cat_zh+a.cat_en).toLowerCase();
+  if(q&&!hay.includes(q))continue;
+  const c=lang==="zh"?a.cat_zh:a.cat_en;
+  if(c!==last){h+=`<span class="cat">${c}</span>`;last=c}
+  h+=`<button type="button" data-app="${a.id}" aria-pressed="${cur.app===a.id}">${esc(nm(a))}</button>`;
+ }
+ if(q)h+=`<span class="cat">${T[lang].task}</span><button type="button" data-task="${esc($("q").value.trim())}" aria-pressed="${!!cur.task}">“${esc($("q").value.trim())}”</button>`;
+ $("apps").innerHTML=h;
+}
+function qs(){const p=new URLSearchParams({lang});if(cur.app)p.set("app",cur.app);if(cur.task)p.set("task",cur.task);if(allow.size)p.set("allow",[...allow]);if(drop.size)p.set("drop",[...drop]);return p}
+async function renderView(){
+ const t=T[lang];const v=await api("/api/view?"+qs());lastView=v;const a=v.app;
+ renderMe(new Set(v.give.map(i=>i.id)));
+ const row=(i,box,on)=>`<div class="row"><input type="checkbox" id="c-${i.id}" data-${box}="${i.id}" ${on?"checked":""} aria-label="give"><label for="c-${i.id}">${esc(txt(i))}</label><span style="display:flex;gap:4px"><span class="tg ${i.level}">${lv(i.level)}</span>${i.sure==="inferred"?`<span class="tg inf">${t.inf}</span>`:""}</span><span class="src">${esc((i.evidence||[]).slice(0,2).map(e=>[e.source,(e.at||"").slice(0,10),e.quote&&("“"+e.quote+"”")].filter(Boolean).join(" · ")).join("  /  "))}</span></div>`;
+ let h=`<div><span class="lab">${esc(nm(a))} ${t.gets}</span><h2>${esc(lang==="zh"?a.task_zh:a.task_en)}</h2><span class="sub">${v.give.length} ${t.items} · ${esc(lang==="zh"?a.dur_zh:a.dur_en)}</span></div>`;
+ h+=(v.give.length||v.dropped.length)?`<div class="rows">${v.give.filter(i=>!allow.has(i.id)).map(i=>row(i,"drop",true)).join("")}${v.dropped.map(i=>row(i,"drop",false)).join("")}</div>`:`<p class="empty">${t.nothing}</p>`;
+ const ask=v.ask.filter(i=>!v.give.some(g=>g.id===i.id));
+ if(v.ask.length)h+=`<div class="rows"><span class="lab">${t.ask}</span>${v.ask.map(i=>row(i,"allow",allow.has(i.id))).join("")}</div>`;
+ if(v.gaps.length)h+=`<div class="rows"><span class="lab">${t.missing}</span>${v.gaps.map(g=>`<div class="gap"><b>${esc(lang==="zh"?g.zh:g.en)}</b><button type="button" data-gap="${g.tag}">${t.add}</button></div>`).join("")}</div>`;
+ h+=`<div class="fp wait" id="fp"><span class="lab">${esc(nm(a))} ${t.first} · ${t.writing}</span><span id="fpt">${esc(v.template)}</span></div>`;
+ h+=`<div class="bar"><button type="button" class="btn pri" id="copy">${t.copy}</button><span class="sub" id="copied"></span></div>`;
+ h+=`<div class="rc"><span class="lab">${t.receipts}</span>${S.receipts.length?S.receipts.slice(0,5).map(r=>`<span>${esc(r.at.slice(0,16).replace("T"," "))} · ${esc(r.app)} · ${r.items.length} ${t.items}</span>`).join(""):t.none}</div>`;
+ $("out").innerHTML=h;
+ const seq=++fpSeq;
+ api("/api/first?"+qs()).then(r=>{if(seq!==fpSeq)return;$("fpt").textContent=r.text||v.template;$("fp").classList.remove("wait");$("fp").querySelector(".lab").textContent=`${nm(a)} ${t.first}${r.by==="template"?" · "+t.byT:""}`}).catch(()=>{});
+}
+document.addEventListener("click",async e=>{
+ const b=e.target.closest("button");if(!b)return;
+ if(b.dataset.l){lang=b.dataset.l;try{localStorage.setItem("totem-lang",lang)}catch{}render();return}
+ if(b.dataset.app){cur={app:b.dataset.app};allow.clear();drop.clear();renderApps();renderView();return}
+ if(b.dataset.task){cur={task:b.dataset.task};allow.clear();drop.clear();renderApps();renderView();return}
+ if(b.dataset.hide){const it=S.items.find(i=>i.id===b.dataset.hide);await api("/api/item",{id:it.id,hidden:!it.hidden});await load();return}
+ if(b.dataset.gap){const g=b.closest(".gap");if(g.querySelector("input"))return;g.insertAdjacentHTML("beforeend",`<span class="addf"><input id="add-${b.dataset.gap}" aria-label="${T[lang].add}"><button type="button" data-save="${b.dataset.gap}">${T[lang].save}</button></span>`);g.querySelector("input").focus();return}
+ if(b.dataset.save){const v=$("add-"+b.dataset.save).value.trim();if(!v)return;await api("/api/add",{text:v,tag:b.dataset.save});await load();return}
+ if(b.id==="copy"){const text=$("fpt").textContent;try{await navigator.clipboard.writeText(text)}catch{}
+  await api("/api/receipt",{app:lastView.app.name,items:lastView.give.map(i=>i.id),duration:lastView.app.dur_en});
+  S.receipts=(await api("/api/state")).receipts;$("copied").textContent=T[lang].copied;return}
+});
+document.addEventListener("change",async e=>{
+ const el=e.target;
+ if(el.tagName==="SELECT"&&el.dataset.id){await api("/api/item",{id:el.dataset.id,level:el.value});await load();return}
+ if(el.dataset.drop){el.checked?drop.delete(el.dataset.drop):drop.add(el.dataset.drop);renderView();return}
+ if(el.dataset.allow){el.checked?allow.add(el.dataset.allow):allow.delete(el.dataset.allow);renderView();return}
+});
+$("q").addEventListener("input",renderApps);
+load();
+</script>
+</body>
+</html>

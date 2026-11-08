@@ -1,0 +1,37 @@
+{
+  "name": "@ipolab/totem",
+  "version": "0.1.0",
+  "description": "Your own context center. Reads your local Claude Code and Codex histories, keeps them on your computer, and shows what each app or agent would get from you.",
+  "type": "module",
+  "bin": {
+    "totem": "bin/totem.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "data",
+    "ui",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "context",
+    "identity",
+    "mcp",
+    "claude-code",
+    "codex",
+    "personal-ai"
+  ],
+  "homepage": "https://try.ipolab.ai",
+  "author": "ipo Lab",
+  "publishConfig": {
+    "access": "public"
+  }
+}

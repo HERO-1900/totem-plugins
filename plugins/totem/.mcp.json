@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "totem": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/server/bin/totem.js", "mcp"]
+    }
+  }
+}
